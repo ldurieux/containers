@@ -85,13 +85,11 @@ public:
 		reserve(other.size());
 		for(size_type i = 0; i < other.size(); ++i)
 			_alloc.construct(_data + i, other[i]);
-		_size(other.size());
+		_size = other.size();
 	}
 
 	~vector()
 	{
-		if (_capacity <= 0)
-			return;
 		for(size_type i = 0; i < _size; ++i)
 			_alloc.destroy(_data + i);
 		_alloc.deallocate(_data, _capacity);
@@ -106,7 +104,7 @@ public:
 			reserve(other.size());
 		for(size_type i = 0; i < other.size(); ++i)
 			_alloc.construct(_data + i, other[i]);
-		_size(other.size());
+		_size = other.size();
 		return *this;
 	}
 
@@ -117,7 +115,7 @@ public:
 			reserve(count);
 		for(size_type i = 0; i < count; ++i)
 			_alloc.construct(_data + i, value);
-		_size(count);
+		_size = count;
 	}
 
 	template <typename InputIt>
@@ -130,7 +128,7 @@ public:
 			reserve(cpy.size());
 		for(size_type i = 0; i < cpy.size(); ++i)
 			_alloc.construct(_data + i, cpy[i]);
-		_size(cpy.count());
+		_size = cpy.size();
 	}
 
 	allocator_type get_allocator() const {
@@ -167,13 +165,13 @@ public:
 
 	reverse_iterator rbegin() { return reverse_iterator(end()); }
 	reverse_iterator rend() { return reverse_iterator(begin()); }
-	const_reverse_iterator rbegin() const { return reverse_iterator(end()); }
-	const_reverse_iterator rend() const { return reverse_iterator(begin()); }
+	const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
+	const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
 	//Capacity
 	bool empty() const { return _size == 0; }
 	size_type size() const { return _size; }
-	size_type max_size() const { return allocator_type::max_size(); }
+	size_type max_size() const { return _alloc.max_size(); }
 	void reserve(size_type new_cap)
 	{
 		if (new_cap < _capacity)
@@ -185,6 +183,7 @@ public:
 			_alloc.construct(res + i, _data[i]);
 			_alloc.destroy(_data + i);
 		}
+		_alloc.deallocate(_data, _capacity);
 		_data = res;
 		_capacity = new_cap;
 	}
@@ -200,13 +199,13 @@ public:
 
 	iterator insert(const_iterator pos, const T& value)
 	{
-		if (_size > _capacity - 1)
-			reserve(max(1, _capacity * 2));
 		size_type idx = distance(begin(), pos);
+		if (_size + 1 > _capacity)
+			reserve(max((size_type)1, _capacity * 2));
 		for (size_type i = _size; i > idx; --i)
 		{
-			_alloc.construct(_data + i, _data + i - 1);
-			_alloc.destruct(_data + i - 1);
+			_alloc.construct(_data + i, _data[i - 1]);
+			_alloc.destroy(_data + i - 1);
 		}
 		_alloc.construct(_data + idx, value);
 		++_size;
@@ -214,13 +213,16 @@ public:
 	}
 	iterator insert(const_iterator pos, size_type count, const T& value)
 	{
-		if (_size > _capacity - count)
-			reserve(max(count, _capacity * 2));
 		size_type idx = distance(begin(), pos);
-		for (size_type i = _size; i > idx; --i)
+		if (_size + count > _capacity)
+			reserve(_capacity + max(count, _capacity));
+		if (_size > 0)
 		{
-			_alloc.construct(_data + i, _data + i - count);
-			_alloc.destruct(_data + i - count);
+			for (size_type i = min(_size, idx + count) - 1; i >= idx; --i)
+			{
+				_alloc.construct(_data + i + count, _data[i]);
+				_alloc.destroy(_data + i);
+			}
 		}
 		for (size_type i = idx; i < idx + count; ++i)
 			_alloc.construct(_data + i, value);
@@ -230,16 +232,35 @@ public:
 
 	template<class InputIt>
 	iterator insert(const_iterator pos, InputIt first, InputIt last,
-	typename ft::enable_if<!ft::is_integral<InputIt>::value, InputIt>::type* = NULL);
+	typename ft::enable_if<!ft::is_integral<InputIt>::value, InputIt>::type* = NULL)
+	{
+		size_type idx = distance(begin(), pos);
+		vector<value_type> cpy(first, last);
+
+		if (_size + cpy.size() > _capacity)
+			reserve(_capacity + cpy.size());
+		if (_size > 0)
+		{
+			for (size_type i = min(_size, idx + cpy.size()) - 1; i >= idx; --i)
+			{
+				_alloc.construct(_data + i + cpy.size(), _data[i]);
+				_alloc.destroy(_data + i);
+			}
+		}
+		for (size_type i = 0; i < cpy.size(); ++i)
+			_alloc.construct(_data + idx + i, cpy[i]);
+		_size += cpy.size();
+		return begin() + idx;
+	}
 
 	iterator erase(iterator pos)
 	{
 		size_type idx = distance(begin(), pos);
-		_alloc.destruct(_data + idx);
+		_alloc.destroy(_data + idx);
 		for (size_type i = idx; i < _size - 1; ++i)
 		{
 			_alloc.construct(_data + i, _data[i + 1]);
-			_alloc.destruct(_data + i + 1);
+			_alloc.destroy(_data + i + 1);
 		}
 		--_size;
 		return begin() + idx;
@@ -249,19 +270,20 @@ public:
 		size_type idx = distance(begin(), first);
 		size_type count = distance(first, last);
 		for(size_type i = idx; i < count + idx; ++i)
-			_alloc.destruct(_data + i);
+			_alloc.destroy(_data + i);
 		for (size_type i = idx; i < _size - count; ++i)
 		{
 			_alloc.construct(_data + i, _data[i + count]);
-			_alloc.destruct(_data + i + count);
+			_alloc.destroy(_data + i + count);
 		}
+		_size -= count;
 		return begin() + idx;
 	}
 
 	void push_back(const T& value)
 	{
-		if (_size > _capacity - 1)
-			reserve(max(1, _capacity * 2));
+		if (_size + 1 > _capacity)
+			reserve(max((size_type)1, _capacity * 2));
 		_alloc.construct(_data + _size, value);
 		++_size;
 	}
@@ -274,20 +296,23 @@ public:
 
 	void resize(size_type count, T value = T())
 	{
-		clear();
 		if (count > _capacity)
 			reserve(max(count, _capacity * 2));
-		for (size_type i = 0; i < count; i++)
-			_alloc.constuct(_data + i, value);
+		for (size_type i = count; i < _size; i++)
+			_alloc.destroy(_data + i);
+		for (size_type i = _size; i < count; i++)
+			_alloc.construct(_data + i, value);
+		_size = count;
 	}
 
 	void swap(vector<T>& other)
 	{
 		if (&other == this)
 			return;
-		vector<T> cpy(other);
-		other = *this;
-		*this = cpy;
+		ft::swap(_data, other._data);
+		ft::swap(_size, other._size);
+		ft::swap(_capacity, other._capacity);
+		ft::swap(_alloc, other._alloc);
 	}
 
 private:

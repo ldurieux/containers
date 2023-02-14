@@ -14,6 +14,13 @@ const T& max(const T& a, const T& b) {
 	return b > a ? b : a;
 }
 
+template <class T>
+void swap(T& a, T& b) {
+	T tmp = b;
+	b = a;
+	a = tmp;
+}
+
 namespace internal {
 
 template<typename T>

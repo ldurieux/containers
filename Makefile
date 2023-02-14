@@ -1,7 +1,8 @@
-NAME		= containers
+SRCS-FT		= \
+			  main-ft.cpp \
 
-SRCS		= \
-			  main.cpp \
+SRCS-STD	= \
+			  main-std.cpp \
 
 HEADERS		= \
 			  . \
@@ -9,8 +10,10 @@ HEADERS		= \
 HEADERS := ${addprefix -I ,$(HEADERS)}
 
 BUILDDIR	= .build
-OBJS		= $(SRCS:%.cpp=$(BUILDDIR)/%.o)
-DEPS		= $(SRCS:%.cpp=$(BUILDDIR)/%.d)
+OBJS-FT		= $(SRCS-FT:%.cpp=$(BUILDDIR)/%.o)
+DEPS-FT		= $(SRCS-FT:%.cpp=$(BUILDDIR)/%.d)
+OBJS-STD	= $(SRCS-STD:%.cpp=$(BUILDDIR)/%.o)
+DEPS-STD	= $(SRCS-STD:%.cpp=$(BUILDDIR)/%.d)
 
 CXX			= c++ -std=c++98
 CXXWFLGS	= -Wall -Wextra -Werror -g3 -fsanitize=address
@@ -20,10 +23,13 @@ RM			= rm -Rf
 MAKE		= make -C
 MKDIR		= mkdir
 
-all : $(NAME)
+all : test-ft test-std
 
-$(NAME) : $(OBJS)
-		$(CXX) $(CXXWFLGS) -o $(NAME) $(OBJS)
+test-ft : $(OBJS-FT)
+		$(CXX) $(CXXWFLGS) $(DEPSFLAGS) -o test-ft $(OBJS-FT)
+
+test-std : $(OBJS-STD)
+		$(CXX) $(CXXWFLGS) $(DEPSFLAGS) -o test-std $(OBJS-STD)
 
 bonus : $(NAME)
 
@@ -31,12 +37,13 @@ clean :
 		-$(RM) $(BUILDDIR)
 
 fclean : clean
-		-$(RM) $(NAME)
+		-$(RM) test-ft test-std
 
 re : fclean
-		$(MAKE) all
+		$(MAKE) ./
 
--include $(DEPS)
+-include $(DEPS-FT)
+-include $(DEPS-STD)
 
 $(BUILDDIR)/%.o : %.cpp Makefile $(LIB_PATHS)
 		@mkdir -p $(@D)

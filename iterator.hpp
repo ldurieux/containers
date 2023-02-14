@@ -40,6 +40,15 @@ typename iterator_traits<InputIt>::difference_type distance(InputIt first, Input
 	return n;
 }
 
+template <class InputIt1, class InputIt2>
+typename iterator_traits<InputIt1>::difference_type distance(InputIt1 first, InputIt2 last)
+{
+	typename iterator_traits<InputIt1>::difference_type n = 0;
+	for (; first != last; ++first)
+		++n;
+	return n;
+}
+
 #define TRAIT iterator_traits<Iter>
 
 template <typename Iter>
