@@ -4,6 +4,16 @@
 namespace ft
 {
 
+template <class T>
+const T& min(const T& a, const T& b) {
+	return b < a ? b : a;
+}
+
+template <class T>
+const T& max(const T& a, const T& b) {
+	return b > a ? b : a;
+}
+
 namespace internal {
 
 template<typename T>
