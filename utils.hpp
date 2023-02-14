@@ -94,8 +94,8 @@ PAIR bool operator>=(const pair<T, U>& lhs, const pair<T, U>& rhs){
 	return !(lhs < rhs);
 }
 
-PAIR pair<T, U> make_pair(T x, T y) {
-	return pair(x, y);
+PAIR pair<T, U> make_pair(T x, U y) {
+	return pair<T, U>(x, y);
 }
 
 } //ft

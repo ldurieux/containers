@@ -5,7 +5,8 @@ SRCS		= \
 
 HEADERS		= \
 			  . \
-			  includes \
+
+HEADERS := ${addprefix -I ,$(HEADERS)}
 
 BUILDDIR	= .build
 OBJS		= $(SRCS:%.cpp=$(BUILDDIR)/%.o)
@@ -39,6 +40,6 @@ re : fclean
 
 $(BUILDDIR)/%.o : %.cpp Makefile $(LIB_PATHS)
 		@mkdir -p $(@D)
-		$(CXX) $(CXXWFLGS) $(DEPSFLAGS) $(CCDEFSFLGS) -I$(HEADERS) $(LIB_HEADERS) -c $< -o $@
+		$(CXX) $(CXXWFLGS) $(DEPSFLAGS) $(CCDEFSFLGS) $(HEADERS) $(LIB_HEADERS) -c $< -o $@
 
 .PHONY: all clean fclean re bonus
