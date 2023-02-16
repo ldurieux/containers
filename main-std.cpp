@@ -29,9 +29,8 @@ void title(const std::string& text, int lvl = 2)
 	std::cout << std::endl;
 }
 
-int main()
+void vector()
 {
-	title("FT", 0);
 	title("vector", 1);
 	{
 		title("empty constructor");
@@ -313,7 +312,32 @@ int main()
 		v.swap(t);
 		print_vector(v);
 		print_vector(t);
+	} {
+		title("operator equal");
+		ns::vector<int> v;
+		ns::vector<int> t;
+		v.push_back(10);
+		t.push_back(10);
+		std::cout << (v == t) << std::endl;
+		v.push_back(15);
+		t.push_back(20);
+		std::cout << (v == t) << std::endl;
+		title("operator less");
+		std::cout << (v < t) << std::endl;
+		t[1] = 15;
+		std::cout << (v < t) << std::endl;
 	}
+}
+
+void map()
+{
+	title("map", 1);
+}
+
+int main()
+{
+	title("FT", 0);
+	vector();
 
 	return 0;
 }

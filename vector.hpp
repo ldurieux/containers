@@ -31,13 +31,17 @@ public:
 		_size(0),
 		_capacity(0),
 		_alloc(Allocator())
-	{}
+	{
+		reserve(0);
+	}
 	explicit vector(const Allocator& alloc) :
 		_data(NULL),
 		_size(0),
 		_capacity(0),
 		_alloc(alloc)
-	{}
+	{
+		reserve(0);
+	}
 	explicit vector(size_type n) :
 		_data(NULL),
 		_size(0),
@@ -327,7 +331,7 @@ bool operator==(const vector<T, A>& a, const vector<T, A>& b)
 {
 	if (a.size() != b.size())
 		return false;
-	return ft::equal(a.begin(), a.end() - 1, b.begin());
+	return ft::equal(a.begin(), a.end(), b.begin());
 }
 
 template<typename T, typename A>
@@ -339,7 +343,7 @@ bool operator!=(const vector<T, A>& a, const vector<T, A>& b)
 template<typename T, typename A>
 bool operator<(const vector<T, A>& a, const vector<T, A>& b)
 {
-	return ft::lexicographical_compare(a.begin(), a.end() - 1, b.begin(), b.end() - 1);
+	return ft::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end());
 }
 
 template<typename T, typename A>

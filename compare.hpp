@@ -34,10 +34,15 @@ struct less
 };
 
 template <typename InputIt1, typename InputIt2>
-bool lexicographical_compare(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2)
+bool lexicographical_compare(InputIt1 it1, InputIt1 last1, InputIt2 it2, InputIt2 last2)
 {
-	return lexicographical_compare(first1, last1, first2, last2,
-		less<typename InputIt1::value_type, typename InputIt2::value_type>());
+	for (;it1 != last1 && it2 != last2; ++it1, ++it2) {
+		if (*it1 < *it2)
+			return true;
+		if (*it2 < *it1)
+			return false;
+	}
+	return it1 == last1 && it2 != last2;
 }
 
 } //ft
