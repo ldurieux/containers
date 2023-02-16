@@ -1,4 +1,5 @@
 #include "vector.hpp"
+#include "map.hpp"
 #include <iostream>
 
 #define ns ft
@@ -338,6 +339,7 @@ int main()
 {
 	title("FT", 0);
 	vector();
+	map();
 
 	return 0;
 }
