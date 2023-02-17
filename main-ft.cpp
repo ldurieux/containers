@@ -330,9 +330,30 @@ void vector()
 	}
 }
 
+template<typename T>
+void print_map(const T& map)
+{
+	std::cout << map.size() << std::endl;
+	std::cout << '[';
+	typename T::const_iterator it = map.begin();
+	if (it != map.end())
+	{
+		std::cout << (*it).first << ':' << (*it).second;
+		++it;
+	}
+	for (; it != map.end(); ++it)
+		std::cout << ',' << (*it).first << ':' << (*it).second;
+	std::cout << ']' << std::endl;
+}
+
 void map()
 {
 	title("map", 1);
+	{
+		title("empty comstructor");
+		ns::map<std::string, int> m;
+		print_map(m);
+	}
 }
 
 int main()

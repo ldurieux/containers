@@ -25,13 +25,16 @@ bool lexicographical_compare(InputIt1 it1, InputIt1 last1, InputIt2 it2, InputIt
 	return it1 == last1 && it2 != last2;
 }
 
-template <typename T, typename U>
+template<typename T>
 struct less
 {
-	bool operator() (const T& x, const U& y) const {
+	bool operator() (const T& x, const T& y) const {
 		return x < y;
 	}
 };
+
+//#include <functional>
+//std::less<int, double> a;
 
 template <typename InputIt1, typename InputIt2>
 bool lexicographical_compare(InputIt1 it1, InputIt1 last1, InputIt2 it2, InputIt2 last2)
