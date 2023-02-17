@@ -160,14 +160,12 @@ void vector()
 	} {
 		title("data");
 		ns::vector<int> v;
-		std::cout << (v.data() != NULL) << std::endl;
 		v.push_back(10);
 		std::cout << (v.data() != NULL) << std::endl;
 	} {
 		title("const data");
 		ns::vector<int> v;
 		const ns::vector<int>& t = v;
-		std::cout << (t.data() != NULL) << std::endl;
 		v.push_back(10);
 		std::cout << (t.data() != NULL) << std::endl;
 	} {
@@ -350,15 +348,199 @@ void map()
 {
 	title("map", 1);
 	{
-		title("empty comstructor");
+		title("empty constructor");
 		ns::map<std::string, int> m;
 		print_map(m);
+	} {
+		title("range constructor");
+		ns::vector<ns::pair<const int, int> > v;
+		v.push_back(ns::make_pair(0, 0));
+		v.push_back(ns::make_pair(-2, 0));
+		v.push_back(ns::make_pair(1, 0));
+		v.push_back(ns::make_pair(-3, 0));
+		v.push_back(ns::make_pair(-1, 0));
+		v.push_back(ns::make_pair(2, 0));
+		ns::map<int, int> m(v.begin(), v.end());
+		print_map(m);
+
+		title("copy constructor");
+		ns::map<int, int> n(m);
+		print_map(n);
+
+		title("assign operator");
+		m.insert(ns::make_pair(3, 0));
+		n = m;
+		print_map(n);
+	} {
+		title("get_allocator");
+		ns::map<int, int> m;
+		std::cout << (m.get_allocator() == std::allocator<ns::pair<const int, int> >()) << std::endl;
+	} {
+		title("at");
+		ns::map<int, int> m;
+		m.insert(ns::make_pair(0, 7));
+		m.insert(ns::make_pair(1, 8));
+		m.insert(ns::make_pair(-1, 9));
+		std::cout << m.at(1) << std::endl;
+		try { std::cout << m.at(2) << std::endl; }
+		catch (...) {
+			std::cout << "Ok" << std::endl;
+		}
+
+		title("const at");
+		const ns::map<int, int> &n = m;;
+		std::cout << n.at(1) << std::endl;
+		try { std::cout << n.at(2) << std::endl; }
+		catch (...) {
+			std::cout << "Ok" << std::endl;
+		}
+
+		title("bracket operator");
+		std::cout << m[1] << std::endl;
+		std::cout << m[2] << std::endl;
+		print_map(m);
+
+		{
+			title("begin and end");
+			ns::map<int, int>::iterator it = m.begin();
+			for (; it != m.end(); ++it)
+				std::cout << (*it).first << std::endl;
+		} {
+			title("const begin and end");
+			ns::map<int, int>::const_iterator it = n.begin();
+			for (; it != n.end(); ++it)
+				std::cout << (*it).first << std::endl;
+		} {
+			title("rbegin and rend");
+			ns::map<int, int>::reverse_iterator it = m.rbegin();
+			for (; it != m.rend(); ++it)
+				std::cout << (*it).first << std::endl;
+		} {
+			title("const rbegin and rend");
+			ns::map<int, int>::const_reverse_iterator it = n.rbegin();
+			for (; it != n.rend(); ++it)
+				std::cout << (*it).first << std::endl;
+		}
+	} {
+		title("empty");
+		ns::map<int, int> m;
+		std::cout << m.empty() << std::endl;
+		m.insert(ns::make_pair(1, 1));
+		std::cout << m.empty() << std::endl;
+
+		title("size");
+		std::cout << m.size() << std::endl;
+		m.insert(ns::make_pair(0, 1));
+		m.insert(ns::make_pair(-1, 1));
+		m.insert(ns::make_pair(-2, 1));
+		m.insert(ns::make_pair(2, 1));
+		m.insert(ns::make_pair(3, 1));
+		m.insert(ns::make_pair(-3, 1));
+		std::cout << m.size() << std::endl;
+
+		title("clear");
+		m.clear();
+		print_map(m);
+	} {
+		title("insert single");
+		ns::map<int, int> m;
+		m.insert(ns::make_pair(0, 1));
+		print_map(m);
+		m.insert(ns::make_pair(1, 1));
+		print_map(m);
+	} {
+		title("insert position");
+		ns::map<int, int> m;
+		m.insert(ns::make_pair(0, 1));
+		print_map(m);
+		m.insert(ns::make_pair(1, 1));
+		print_map(m);
+	} {
+		title("insert range");
+		ns::vector<ns::pair<const std::string, int> > v;
+		v.push_back(ns::make_pair("one", 1));
+		v.push_back(ns::make_pair("two", 2));
+		v.push_back(ns::make_pair("three", 3));
+		v.push_back(ns::make_pair("minus one", -1));
+		v.push_back(ns::make_pair("minus two", -2));
+		ns::map<std::string, int> m;
+		m.insert(v.begin(), v.end());
+		print_map(m);
+
+		title("erase key");
+		m.erase("one");
+		print_map(m);
+
+		title("erase iterator");
+		m.erase(m.begin());
+		print_map(m);
+
+		title("erase range");
+		m.erase(m.begin(), m.end());
+		print_map(m);
+	} {
+		title("swap");
+		ns::map<int, int> m;
+		ns::map<int, int> n;
+		m.insert(ns::make_pair(1, 1));
+		m.insert(ns::make_pair(2, 2));
+		m.swap(n);
+		print_map(m);
+		print_map(n);
+
+		title("count");
+		std::cout << n.count(1) << std::endl;
+		std::cout << n.count(3) << std::endl;
+
+		title("find");
+		std::cout << (*n.find(1)).second << std::endl;
+		std::cout << (n.find(0) == n.end()) << std::endl;
+
+		title("const find");
+		const ns::map<int, int> &o = n;
+		std::cout << (*o.find(1)).second << std::endl;
+		std::cout << (o.find(0) == o.end()) << std::endl;
+
+		title("lower_bound");
+		std::cout << (*n.lower_bound(1)).second << std::endl;
+		std::cout << (n.lower_bound(0) == n.end()) << std::endl;
+
+		title("const lower_bound");
+		std::cout << (*o.lower_bound(1)).second << std::endl;
+		std::cout << (o.lower_bound(0) == o.end()) << std::endl;
+
+		title("upper_bound");
+		std::cout << (*n.upper_bound(1)).second << std::endl;
+		std::cout << (n.upper_bound(0) == n.end()) << std::endl;
+
+		title("const upper_bound");
+		std::cout << (*o.upper_bound(1)).second << std::endl;
+		std::cout << (o.upper_bound(0) == o.end()) << std::endl;
+
+		{
+			title("equal_range");
+			ns::pair<ns::map<int, int>::iterator, ns::map<int, int>::iterator> pair;
+			pair = n.equal_range(1);
+			std::cout << (pair.first == n.lower_bound(1))
+					  << ' ' << (pair.second == n.upper_bound(1)) << std::endl;
+			pair = n.equal_range(0);
+			std::cout << (pair.first == n.lower_bound(0))
+					  << ' ' << (pair.second == n.upper_bound(0)) << std::endl;
+		} {
+			title("const equal_range");
+			ns::pair<ns::map<int, int>::const_iterator, ns::map<int, int>::const_iterator> pair;
+			pair = o.equal_range(1);
+			std::cout << (pair.first == o.lower_bound(1))
+					  << ' ' << (pair.second == o.upper_bound(1)) << std::endl;
+			pair = o.equal_range(0);
+			std::cout << (pair.first == o.lower_bound(0))
+					  << ' ' << (pair.second == o.upper_bound(0)) << std::endl;
+		}
 	}
 }
 
 int main()
 {
-	title("FT", 0);
 	vector();
 	map();
 
